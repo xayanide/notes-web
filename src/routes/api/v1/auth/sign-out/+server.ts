@@ -1,4 +1,4 @@
-import type { RequestHandler } from "@sveltejs/kit";
+import { json, type RequestHandler } from "@sveltejs/kit";
 import * as cookie from "cookie";
 import { prisma } from "$lib/server/database";
 
@@ -14,5 +14,5 @@ export const POST: RequestHandler = async ({ request }) => {
             cookie.serialize("refresh_token", "", { httpOnly: true, path: "/", maxAge: 0 }),
         ],
     };
-    return new Response(JSON.stringify({ message: "logged out" }), { status: 200, headers });
+    return json({ message: "logged out" }, { status: 200, headers });
 };

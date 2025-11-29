@@ -1,4 +1,4 @@
-import type { RequestHandler } from "@sveltejs/kit";
+import { json, type RequestHandler } from "@sveltejs/kit";
 import { prisma } from "$lib/server/database";
 import { loginSchema } from "$lib/server/validators";
 import {
@@ -14,23 +14,23 @@ import { getCurrentUser } from "$lib/server/getCurrentUser";
 export const POST: RequestHandler = async ({ request }) => {
     const currentUser = await getCurrentUser(request);
     if (currentUser) {
-        return new Response(JSON.stringify({ error: "Already signed in" }), { status: 400 });
+        return json({ error: "Already signed in" }, { status: 400 });
     }
     const body = await request.json();
     const parsed = loginSchema.safeParse(body);
     if (!parsed.success) {
-        return new Response(JSON.stringify({ error: parsed.error.message }), { status: 400 });
+        return json({ error: parsed.error.message }, { status: 400 });
     }
     const { emailOrUsername, password } = parsed.data;
     const user = await prisma.user.findFirst({
         where: { OR: [{ email: emailOrUsername }, { username: emailOrUsername }] },
     });
     if (!user) {
-        return new Response(JSON.stringify({ error: "Invalid identifier" }), { status: 401 });
+        return json({ error: "Invalid identifier" }, { status: 401 });
     }
     const success = await verifyPassword(user.password, password);
     if (!success) {
-        return new Response(JSON.stringify({ error: "Invalid password" }), { status: 401 });
+        return json({ error: "Invalid password" }, { status: 401 });
     }
     const accessToken = await createAccessToken(user);
     const refreshToken = await createRefreshToken(user);
@@ -54,5 +54,5 @@ export const POST: RequestHandler = async ({ request }) => {
             }),
         ],
     };
-    return new Response(JSON.stringify({ message: "ok" }), { status: 200, headers });
+    return json({ message: "ok" }, { status: 200, headers });
 };

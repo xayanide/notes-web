@@ -1,4 +1,4 @@
-import type { RequestHandler } from "@sveltejs/kit";
+import { json, type RequestHandler } from "@sveltejs/kit";
 import { prisma } from "$lib/server/database";
 import * as cookie from "cookie";
 import { verifyRefreshToken, createRefreshToken, createAccessToken } from "$lib/server/auth";
@@ -8,22 +8,22 @@ export const POST: RequestHandler = async ({ request }) => {
     const cookies = cookie.parse(request.headers.get("cookie") || "");
     const refresh = cookies.refresh_token;
     if (!refresh) {
-        return new Response(null, { status: 401 });
+        return json(null, { status: 401 });
     }
     const payload = await verifyRefreshToken(refresh);
     if (!payload) {
-        return new Response(null, { status: 401 });
+        return json(null, { status: 401 });
     }
     // check DB presence and expiry
     const tokenRow = await prisma.refreshToken.findUnique({ where: { token: refresh } });
     if (!tokenRow || tokenRow.expiresAt < new Date()) {
-        return new Response(null, { status: 401 });
+        return json(null, { status: 401 });
     }
     // rotate: delete old token, issue new refresh token and new access token
     await prisma.refreshToken.deleteMany({ where: { token: refresh } });
     const user = await prisma.user.findUnique({ where: { id: (payload as any).userId } });
     if (!user) {
-        return new Response(null, { status: 401 });
+        return json(null, { status: 401 });
     }
     const newRefresh = await createRefreshToken(user); // createRefreshToken persists it
     const newAccess = await createAccessToken(user);
@@ -46,5 +46,5 @@ export const POST: RequestHandler = async ({ request }) => {
             }),
         ],
     };
-    return new Response(JSON.stringify({ message: "refreshed" }), { status: 200, headers });
+    return json({ message: "refreshed" }, { status: 200, headers });
 };
