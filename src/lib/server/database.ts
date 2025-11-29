@@ -14,6 +14,6 @@ export const prisma = globalForPrisma.prisma || new PrismaClient({ adapter });
 // If you just export const prisma = new PrismaClient(), you could create multiple PrismaClient instances.
 // So as a solution we reuse the instance when needed
 if (dev) {
-    globalForPrisma.prisma = prisma;
-    console.warn("Running in development environment, reusing prisma instance");
+  globalForPrisma.prisma = prisma;
+  console.warn("Running in development environment, reusing prisma instance");
 }

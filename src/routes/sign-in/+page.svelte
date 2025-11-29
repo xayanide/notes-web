@@ -1,6 +1,7 @@
 <script>
   export let form;
 </script>
+
 <h1>Login</h1>
 
 <form method="post">
@@ -14,5 +15,5 @@
 </form>
 
 {#if form?.error}
-<p style="color:red">{form.error}</p>
+  <p style="color:red">{form.error}</p>
 {/if}

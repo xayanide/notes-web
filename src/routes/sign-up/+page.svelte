@@ -1,6 +1,7 @@
 <script>
   export let form;
 </script>
+
 <h1>Register</h1>
 
 <form method="post">
@@ -11,11 +12,11 @@
   <input name="email" type="email" required />
 
   <label>Password</label>
-  <input name="password" type="password" required minlength="8"/>
+  <input name="password" type="password" required minlength="8" />
 
   <button type="submit">Create Account</button>
 </form>
 
 {#if form?.error}
-<p style="color:red">{form.error}</p>
+  <p style="color:red">{form.error}</p>
 {/if}

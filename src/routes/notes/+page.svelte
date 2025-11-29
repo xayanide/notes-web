@@ -9,11 +9,11 @@
     <h2>Add a New Note</h2>
     <form method="post">
       <div>
-        <label for="new-title">Title</label><br/>
+        <label for="new-title">Title</label><br />
         <input id="new-title" name="title" placeholder="Enter title" required />
       </div>
       <div>
-        <label for="new-content">Content</label><br/>
+        <label for="new-content">Content</label><br />
         <textarea id="new-content" name="content" placeholder="Enter note content"></textarea>
       </div>
       <div>
@@ -27,16 +27,17 @@
     <ul>
       {#each data.notes as note}
         <li style="margin-bottom:1rem; border:1px solid #ccc; padding:0.5rem;">
-          <strong>Note ID:</strong> {note.id}<br/>
+          <strong>Note ID:</strong>
+          {note.id}<br />
 
           <form method="post">
             <input type="hidden" name="id" value={note.id} />
             <div>
-              <label for="title-{note.id}">Title</label><br/>
+              <label for="title-{note.id}">Title</label><br />
               <input id="title-{note.id}" name="title" value={note.title} />
             </div>
             <div>
-              <label for="content-{note.id}">Content</label><br/>
+              <label for="content-{note.id}">Content</label><br />
               <textarea id="content-{note.id}" name="content">{note.content}</textarea>
             </div>
             <div>
