@@ -1,12 +1,12 @@
 import { z } from "zod";
 
-export const registerSchema = z.object({
+export const signUpSchema = z.object({
     username: z.string().min(3).max(30),
     email: z.email(),
     password: z.string().min(8),
 });
 
-export const loginSchema = z.object({
+export const signInSchema = z.object({
     emailOrUsername: z.string(),
     password: z.string().min(1),
 });
@@ -14,4 +14,9 @@ export const loginSchema = z.object({
 export const noteSchema = z.object({
     title: z.string().min(1).max(255),
     content: z.string().optional(),
+});
+
+export const changePasswordSchema = z.object({
+    oldPassword: z.string().min(1),
+    newPassword: z.string().min(8, "Password must be at least 8 characters"),
 });

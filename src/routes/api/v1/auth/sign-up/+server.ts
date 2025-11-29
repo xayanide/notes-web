@@ -1,11 +1,11 @@
 import { json, type RequestHandler } from "@sveltejs/kit";
 import { prisma } from "$lib/server/database";
-import { registerSchema } from "$lib/server/validators";
+import { signUpSchema } from "$lib/server/validators";
 import { getHashedPassword } from "$lib/server/auth";
 
 export const POST: RequestHandler = async ({ request }) => {
     const body = await request.json();
-    const parsed = registerSchema.safeParse(body);
+    const parsed = signUpSchema.safeParse(body);
     if (!parsed.success) {
         return json({ error: parsed.error.message }, { status: 400 });
     }

@@ -1,6 +1,6 @@
 import { json, type RequestHandler } from "@sveltejs/kit";
 import { prisma } from "$lib/server/database";
-import { loginSchema } from "$lib/server/validators";
+import { signInSchema } from "$lib/server/validators";
 import {
     verifyPassword,
     createAccessToken,
@@ -17,7 +17,7 @@ export const POST: RequestHandler = async ({ request }) => {
         return json({ error: "Already signed in" }, { status: 400 });
     }
     const body = await request.json();
-    const parsed = loginSchema.safeParse(body);
+    const parsed = signInSchema.safeParse(body);
     if (!parsed.success) {
         return json({ error: parsed.error.message }, { status: 400 });
     }
