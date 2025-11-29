@@ -1,6 +1,7 @@
 # ???
 
 ## Prerequisites
+
 - Terminal
 - Code Editor
 - JavaScript Runtime Environment
@@ -10,9 +11,10 @@
 ## Usage
 
 ### 1. Install dependencies
+
 ```sh
 npm install
-````
+```
 
 ### 2. Set up the database
 
@@ -39,6 +41,7 @@ This will start the server and you can view your app in the browser.
 ## Database Management
 
 ### 1. Editing the schema
+
 Prisma uses a schema file to define your database structure. The file is usually located at `prisma/schema.prisma`.
 
 - Open `prisma/schema.prisma` in your code editor.
@@ -46,6 +49,7 @@ Prisma uses a schema file to define your database structure. The file is usually
 - Save the file.
 
 ### 2. Applying schema changes (migrations)
+
 After editing the schema, run the following commands to update the database and generate the Prisma client:
 
 ```sh
@@ -69,9 +73,9 @@ To backup your PostgreSQL database:
 pg_dump -U your_db_user -h localhost -p 5432 your_db_name > backup.sql
 ```
 
-* Replace `your_db_user` with your PostgreSQL username.
-* Replace `your_db_name` with your database name.
-* `backup.sql` will be the file containing the backup.
+- Replace `your_db_user` with your PostgreSQL username.
+- Replace `your_db_name` with your database name.
+- `backup.sql` will be the file containing the backup.
 
 ### 4. Restore the database
 
@@ -82,7 +86,7 @@ To restore from a backup file:
 psql -U your_db_user -h localhost -p 5432 your_db_name < backup.sql
 ```
 
-* Ensure the target database (`your_db_name`) already exists or create it beforehand:
+- Ensure the target database (`your_db_name`) already exists or create it beforehand:
 
 ```sh
 createdb -U your_db_user -h localhost your_db_name
@@ -108,6 +112,7 @@ npx prisma migrate reset
 Prisma provides a GUI called **Prisma Studio** that allows you to view and manage your database data without writing SQL queries.
 
 #### Opening Prisma Studio
+
 Run the following command:
 
 ```sh
@@ -126,6 +131,7 @@ This will open Prisma Studio in your default web browser. You can view all table
 Prisma allows you to prepopulate your database with initial data using a **seed script**.
 
 #### 1. Create a seed script
+
 - By default, Prisma looks for a script defined in `package.json` under `"prisma": { "seed": "..." }`.
 - Example: create `prisma/seed.ts` (TypeScript) or `prisma/seed.js` (JavaScript) with your seed data:
 
@@ -135,7 +141,7 @@ import { PrismaClient } from "../src/generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 const adapter = new PrismaPg({
-    connectionString: process.env.DATABASE_URL!,
+  connectionString: process.env.DATABASE_URL!,
 });
 
 const prisma = new PrismaClient({ adapter });
@@ -143,20 +149,22 @@ const prisma = new PrismaClient({ adapter });
 export async function main() {}
 
 try {
-    await main();
+  await main();
 } catch (err) {
-    if (err instanceof Error) {
-        console.error(`Encountered error while seeding\n${err.message}\n${err.stack}`);
-    }
+  if (err instanceof Error) {
+    console.error(`Encountered error while seeding\n${err.message}\n${err.stack}`);
+  }
 } finally {
-    await prisma.$disconnect();
+  await prisma.$disconnect();
 }
 ```
 
 2. Run the seed script
+
 ```
 npx prisma db seed
 ```
+
 This executes your seed script and inserts the predefined data into the database. Useful for development, testing, or initializing default records.
 
 > [!NOTES]
@@ -166,27 +174,34 @@ This executes your seed script and inserts the predefined data into the database
 ## Tech Stack
 
 ### Git Repository Hosting Service
+
 - GitHub
 
 ### Distributed Version Control Sysem
+
 - Git
 
 ### IDE / Code Editor
+
 - Visual Studio Code
 
 ### JavaScript Runtime Environment
+
 - Node.JS, Bun
 
 ### Package Managers
+
 - npm, bun, pnpm
 
 ### Backend
+
 - Prisma ORM (A library that helps with the process of making database operations from the web app)
 - PostreSQL (Client-Server Relational Database)
 - SvelteKit (Backend Framework)
 - TypeScript (Superset of JavaScript with static typing)
 
 ### Frontend
+
 - HTML
 - JavaScript
 - CSS
@@ -196,22 +211,27 @@ This executes your seed script and inserts the predefined data into the database
 - Flowbite-Svelte (Svelte UI Components)
 
 ### Frontend Build Tools
+
 - Vite
 
 ### Development Tools
+
 - ESLint (Code linter)
 - Prettier (Opinionated code formatter)
 
 ### Authentication / Security
+
 - argon2 (Password hashing)
 - jose (JWT and cryptography)
 - cookie (Cookie parsing)
 - cookie-signature (Signing cookies)
 
 ### General Schema Validator
+
 - zod
 
 ### Environment Management
+
 - dotenv
 
 ---

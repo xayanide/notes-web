@@ -1,16 +1,16 @@
 {
-    "singleQuote": false,
-    "trailingComma": "all",
-    "printWidth": 100,
-    "quoteProps": "consistent",
-    "plugins": ["prettier-plugin-tailwindcss", "prettier-plugin-svelte"],
-    "overrides": [
-        {
-            "files": "*.svelte",
-            "options": {
-                "parser": "svelte"
-            }
-        }
-    ],
-    "tailwindStylesheet": "./src/routes/layout.css"
+  "singleQuote": false,
+  "trailingComma": "all",
+  "printWidth": 100,
+  "quoteProps": "consistent",
+  "plugins": ["prettier-plugin-tailwindcss", "prettier-plugin-svelte"],
+  "overrides": [
+    {
+      "files": "*.svelte",
+      "options": {
+        "parser": "svelte"
+      }
+    }
+  ],
+  "tailwindStylesheet": "./src/routes/layout.css"
 }

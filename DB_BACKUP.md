@@ -8,12 +8,12 @@ pg_dump -U postgres -F c -b -v -f "F:\mydatabase.backup" mydatabase
 
 Explanation:
 
-* `-U postgres` username
-* `-F c` ustom format (recommended for backup/restore)
-* `-b` include large objects
-* `-v` verbose
-* `-f` output file path
-* `mydatabase` database name
+- `-U postgres` username
+- `-F c` ustom format (recommended for backup/restore)
+- `-b` include large objects
+- `-v` verbose
+- `-f` output file path
+- `mydatabase` database name
 
 This will produce a single `.backup` file that contains your entire database.
 
@@ -21,8 +21,8 @@ This will produce a single `.backup` file that contains your entire database.
 
 ### 2. Copy the Backup File
 
-* Put `mydatabase.backup` on a USB drive or cloud storage.
-* Take it to your work laptop.
+- Put `mydatabase.backup` on a USB drive or cloud storage.
+- Take it to your work laptop.
 
 ---
 
@@ -35,8 +35,8 @@ createdb -U postgres mydatabase
 pg_restore -U postgres -d mydatabase -v "F:\mydatabase.backup"
 ```
 
-* `createdb` - creates the empty database
-* `pg_restore` - restores the backup into that database
+- `createdb` - creates the empty database
+- `pg_restore` - restores the backup into that database
 
 ---
 
@@ -48,8 +48,8 @@ If you prefer a SQL file that you can inspect or modify:
 pg_dump -U postgres -F p -v -f "F:\mydatabase.sql" mydatabase
 ```
 
-* `-F p` - plain SQL
-* You can restore using `psql`:
+- `-F p` - plain SQL
+- You can restore using `psql`:
 
 ```bash
 psql -U postgres -d mydatabase -f "F:\mydatabase.sql"
