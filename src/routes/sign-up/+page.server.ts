@@ -11,8 +11,8 @@ export const actions: Actions = {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ username, email, password }),
         });
-        const data = await res.json();
         if (!res.ok) {
+            const data = await res.json();
             return { error: data.error ?? "Unknown error" };
         }
         throw redirect(303, "/sign-in");
