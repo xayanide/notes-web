@@ -1,2 +1,17 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script>
+  export let data;
+</script>
+
+<h1>Your me page</h1>
+
+{#if data.user}
+<p>ID: {data.user.id}</p>
+<p>Username: {data.user.username}</p>
+<p>Email: {data.user.email}</p>
+<p><a href="/sign-out">Sign-out</a></p>
+<a href="/notes">Notes</a>
+{:else}
+<p>You are not signed in.</p>
+<a href="/sign-in">Sign-in</a>
+<a href="/sign-up">Sign-up</a>
+{/if}
