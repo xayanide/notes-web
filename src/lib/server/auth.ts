@@ -4,11 +4,13 @@ import { prisma } from "./database";
 import * as argon2 from "argon2";
 import { SignJWT, jwtVerify } from "jose";
 import type { User } from "../../generated/prisma/client";
+import { JWT_ACCESS_SECRET, JWT_REFRESH_SECRET, ACCESS_TOKEN_EXPIRES, REFRESH_TOKEN_EXPIRES } from "$env/static/private";
 
-const ACCESS_SECRET = new TextEncoder().encode(process.env.JWT_ACCESS_SECRET!);
-const REFRESH_SECRET = new TextEncoder().encode(process.env.JWT_REFRESH_SECRET!);
-const ACCESS_EXPIRES = process.env.ACCESS_TOKEN_EXPIRES || "15m";
-const REFRESH_EXPIRES = process.env.REFRESH_TOKEN_EXPIRES || "7d";
+const ACCESS_SECRET = new TextEncoder().encode(JWT_ACCESS_SECRET);
+const REFRESH_SECRET = new TextEncoder().encode(JWT_REFRESH_SECRET);
+
+export const ACCESS_EXPIRES_SECONDS = parseDurationToSeconds(ACCESS_TOKEN_EXPIRES || "15m")
+export const REFRESH_EXPIRES_SECONDS = parseDurationToSeconds(REFRESH_TOKEN_EXPIRES || "7d")
 
 export async function hashPassword(password: string) {
   // argon2id is used by default in many argon2 packages; adjust options for your hardware
@@ -29,29 +31,27 @@ function parseDurationToSeconds(s: string) {
 }
 
 export async function createAccessToken(user: User) {
-  const expiresInSec = parseDurationToSeconds(ACCESS_EXPIRES);
   const now = Math.floor(Date.now() / 1000);
 
   return await new SignJWT({ userId: user.id, role: user.role })
     .setProtectedHeader({ alg: "HS256", typ: "JWT" })
     .setIssuedAt(now)
-    .setExpirationTime(now + expiresInSec)
+    .setExpirationTime(now + ACCESS_EXPIRES_SECONDS)
     .sign(ACCESS_SECRET);
 }
 
 export async function createRefreshToken(user: User) {
-  const expiresInSec = parseDurationToSeconds(REFRESH_EXPIRES);
   const now = Math.floor(Date.now() / 1000);
   const tokenId = randomUUID();
 
   const token = await new SignJWT({ jti: tokenId, userId: user.id })
     .setProtectedHeader({ alg: "HS256", typ: "JWT" })
     .setIssuedAt(now)
-    .setExpirationTime(now + expiresInSec)
+    .setExpirationTime(now + REFRESH_EXPIRES_SECONDS)
     .sign(REFRESH_SECRET);
 
   // persist token so we can revoke / rotate it
-  const expiresAt = new Date(Date.now() + expiresInSec * 1000);
+  const expiresAt = new Date(Date.now() + REFRESH_EXPIRES_SECONDS * 1000);
   await prisma.refreshToken.create({
     data: { token, userId: user.id, expiresAt }
   });

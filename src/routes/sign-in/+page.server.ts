@@ -9,7 +9,7 @@ export const actions: Actions = {
     const res = await event.fetch("/api/v1/auth/sign-in", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ identifier, password })
+      body: JSON.stringify({ emailOrUsername: identifier, password })
     });
 
     if (!res.ok) return { error: "Invalid login" };
