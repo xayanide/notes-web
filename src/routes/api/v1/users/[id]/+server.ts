@@ -3,7 +3,7 @@ import { prisma } from "$lib/server/database";
 
 export const GET: RequestHandler = async ({ params }) => {
     const id = Number(params.id);
-    console.log(id);
+    console.log(id)
     if (!id || isNaN(id)) {
         return new Response(null, { status: 404 });
     }
