@@ -30,6 +30,7 @@
           <strong>Note ID:</strong> {note.id}<br/>
 
           <form method="post">
+            <input type="hidden" name="id" value={note.id} />
             <div>
               <label for="title-{note.id}">Title</label><br/>
               <input id="title-{note.id}" name="title" value={note.title} />
