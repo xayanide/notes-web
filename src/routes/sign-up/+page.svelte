@@ -2,7 +2,11 @@
   export let form;
 </script>
 
-<h1>Register</h1>
+<svelte:head>
+  <title>Sign-up</title>
+</svelte:head>
+
+<h1>Sign-up</h1>
 
 <form method="post">
   <label>Username</label>

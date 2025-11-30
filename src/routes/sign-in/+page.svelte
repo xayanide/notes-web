@@ -2,7 +2,11 @@
   export let form;
 </script>
 
-<h1>Login</h1>
+<h1>Sign-in</h1>
+
+<svelte:head>
+  <title>Sign-in</title>
+</svelte:head>
 
 <form method="post">
   <label>Email or Username</label>

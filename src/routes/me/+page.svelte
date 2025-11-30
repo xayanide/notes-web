@@ -2,6 +2,10 @@
   export let data;
 </script>
 
+<svelte:head>
+  <title>Me{data.user ? ` - ${data.user.username}` : ""}</title>
+</svelte:head>
+
 <h1>Your me page</h1>
 
 {#if data.user}

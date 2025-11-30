@@ -2,6 +2,10 @@
   export let data;
 </script>
 
+<svelte:head>
+  <title>Notes</title>
+</svelte:head>
+
 {#if !data.error}
   <h1>Your Notes</h1>
   <p><a href="/me">Back to home</a></p>

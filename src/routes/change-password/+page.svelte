@@ -3,6 +3,10 @@
   export let form;
 </script>
 
+<svelte:head>
+  <title>Change your password</title>
+</svelte:head>
+
 <h1>Change your password</h1>
 
 {#if data.user}
