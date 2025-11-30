@@ -23,6 +23,8 @@
   {#if form?.success}<p style="color:green">{form.success}</p>{/if}
   {#if form?.error}<p style="color:red">{form.error}</p>{/if}
 
+  <p><a href="/notes">Home</a></p>
+  <p><a href="/notes">Notes</a></p>
   <p><a href="/sign-out">Sign-out</a></p>
 {:else}
   <p>You are not signed in.</p>
