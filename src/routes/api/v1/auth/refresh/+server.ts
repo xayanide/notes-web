@@ -1,7 +1,7 @@
 import { json, type RequestHandler } from "@sveltejs/kit";
 import { prisma } from "$lib/server/database";
 import * as cookie from "cookie";
-import { verifyRefreshToken, createRefreshToken, createAccessToken } from "$lib/server/auth";
+import { verifyRefreshToken, createAccessToken, rotateRefreshToken } from "$lib/server/auth";
 import { getNewTokenHeaders } from "$lib/server/authTokens";
 
 export const POST: RequestHandler = async ({ request }) => {
@@ -20,12 +20,12 @@ export const POST: RequestHandler = async ({ request }) => {
     return json(null, { status: 401 });
   }
   // rotate: delete old token, issue new refresh token and new access token
-  await prisma.refreshToken.deleteMany({ where: { token: refreshToken } });
   const user = await prisma.user.findUnique({ where: { id: (payload as any).userId } });
   if (!user) {
     return json(null, { status: 401 });
   }
-  const newRefreshToken = await createRefreshToken(user); // createRefreshToken persists it
+  // createRefreshToken persists it
+  const newRefreshToken = await rotateRefreshToken(refreshToken, user);
   const newAccessToken = await createAccessToken(user);
   const headers = getNewTokenHeaders(newAccessToken, newRefreshToken);
   return json({ message: "refreshed" }, { status: 200, headers });

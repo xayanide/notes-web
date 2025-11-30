@@ -85,8 +85,7 @@ export async function revokeRefreshToken(token: string) {
 }
 
 // rotate refresh: remove old DB entry and create a brand new token for user
-export async function rotateRefreshToken(oldToken: string, userId: number) {
-  await prisma.refreshToken.deleteMany({ where: { token: oldToken } });
-  // create new refresh token
-  return createRefreshToken({ id: userId });
+export async function rotateRefreshToken(oldToken: string, user: User) {
+  await revokeRefreshToken(oldToken);
+  return await createRefreshToken(user);
 }
