@@ -12,6 +12,7 @@
   <p>User ID: {data.user.id}</p>
   <p>Username: {data.user.username}</p>
   <p>Email: {data.user.email}</p>
+  <p>Created at: {data.user.createdAt}</p>
   <a href="/change-password">Change Password</a>
 {:else}
   <p>You are not signed in.</p>
