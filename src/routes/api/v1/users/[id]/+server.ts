@@ -1,4 +1,4 @@
-import { error, json, redirect, type RequestHandler } from "@sveltejs/kit";
+import { error, json, type RequestHandler } from "@sveltejs/kit";
 import { prisma } from "$lib/server/database";
 import { getCurrentUser } from "$lib/server/getCurrentUser";
 import { getHashedPassword } from "$lib/server/auth";
@@ -15,7 +15,15 @@ export const GET: RequestHandler = async ({ params }) => {
       where: { username: raw },
     });
     if (userByName) {
-      throw redirect(302, `/${userByName.id}`);
+      return json(
+        {
+          id: userByName.id,
+          username: userByName.username,
+          createdAt: userByName.createdAt,
+          role: userByName.role,
+        },
+        { status: 200 },
+      );
     }
   }
   if (!user) {
