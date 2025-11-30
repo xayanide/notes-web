@@ -32,7 +32,10 @@
         <li style="margin-bottom:1rem; border:1px solid #ccc; padding:0.5rem;">
           <strong>Note ID:</strong>
           {note.id}<br />
-
+          <strong>Created at:</strong>
+          {note.createdAt}<br />
+          <strong>Updated at:</strong>
+          {note.updatedAt}<br />
           <form method="post">
             <input type="hidden" name="id" value={note.id} />
             <div>

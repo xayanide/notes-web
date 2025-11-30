@@ -12,6 +12,7 @@ export const GET: RequestHandler = async ({ request }) => {
       username: user.username,
       email: user.email,
       role: user.role,
+      createdAt: user.createdAt,
     },
     { status: 200 },
   );

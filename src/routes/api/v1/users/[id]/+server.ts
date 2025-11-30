@@ -1,18 +1,70 @@
-import { json, type RequestHandler } from "@sveltejs/kit";
+import { error, json, redirect, type RequestHandler } from "@sveltejs/kit";
 import { prisma } from "$lib/server/database";
+import { getCurrentUser } from "$lib/server/getCurrentUser";
+import { getHashedPassword } from "$lib/server/auth";
 
 export const GET: RequestHandler = async ({ params }) => {
-  const id = Number(params.id);
-  if (!id || isNaN(id)) {
-    return json(null, { status: 404 });
+  const raw = params.id;
+  const asNumber = Number(raw);
+  let user = null;
+  if (!isNaN(asNumber)) {
+    user = await prisma.user.findUnique({ where: { id: asNumber } });
   }
-  const user = await prisma.user.findUnique({ where: { id } });
   if (!user) {
-    return json(null, { status: 404 });
+    const userByName = await prisma.user.findUnique({
+      where: { username: raw },
+    });
+    if (userByName) {
+      throw redirect(302, `/${userByName.id}`);
+    }
   }
-  // expose public profile fields only
+  if (!user) {
+    return json({ message: "User not found" }, { status: 404 });
+  }
   return json(
-    { id: user.id, username: user.username, createdAt: user.createdAt, role: user.role },
+    {
+      id: user.id,
+      username: user.username,
+      createdAt: user.createdAt,
+      role: user.role,
+    },
     { status: 200 },
   );
+};
+
+export const PATCH: RequestHandler = async ({ request, params }) => {
+  const user = await getCurrentUser(request);
+  if (!user) {
+    throw error(401, "Unauthorized");
+  }
+  const targetUserId = Number(params.id);
+  const body = await request.json();
+  const isAdmin = user.role === "ADMIN";
+  const isSelf = user.id === targetUserId;
+  if (!isAdmin) {
+    throw error(403, "Forbidden");
+  }
+  if (isSelf && body.role && body.role !== user.role) {
+    throw error(403, "Admins cannot change their own role");
+  }
+  let data: any = {};
+  if (body.username) {
+    data.username = body.username;
+  }
+  if (body.email) {
+    data.email = body.email;
+  }
+  if (body.password) {
+    data.password = await getHashedPassword(body.password);
+  }
+  if (!isSelf && body.role) {
+    if (["ADMIN", "USER"].includes(body.role)) {
+      data.role = body.role;
+    }
+  }
+  const updated = await prisma.user.update({
+    where: { id: targetUserId },
+    data,
+  });
+  return json({ success: true, user: updated });
 };
