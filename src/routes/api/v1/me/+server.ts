@@ -1,5 +1,5 @@
 import { json, type RequestHandler } from "@sveltejs/kit";
-import { getCurrentUser } from "$lib/server/getCurrentUser";
+import { getCurrentUser } from "$lib/server/auth";
 
 export const GET: RequestHandler = async ({ request }) => {
   const user = await getCurrentUser(request);

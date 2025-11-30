@@ -1,4 +1,4 @@
-import { getCurrentUser } from "$lib/server/getCurrentUser";
+import { getCurrentUser } from "$lib/server/auth";
 import { prisma } from "$lib/server/database";
 import { error } from "@sveltejs/kit";
 

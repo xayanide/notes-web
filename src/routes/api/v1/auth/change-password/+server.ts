@@ -2,7 +2,7 @@ import { json, type RequestHandler } from "@sveltejs/kit";
 import { prisma } from "$lib/server/database";
 import { getHashedPassword, verifyPassword } from "$lib/server/auth";
 import { changePasswordSchema } from "$lib/server/validators";
-import { getCurrentUser } from "$lib/server/getCurrentUser";
+import { getCurrentUser } from "$lib/server/auth";
 
 export const POST: RequestHandler = async ({ request }) => {
   const user = await getCurrentUser(request);

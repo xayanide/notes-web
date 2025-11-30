@@ -2,7 +2,7 @@ import { json, type RequestHandler } from "@sveltejs/kit";
 import { prisma } from "$lib/server/database";
 import { signInSchema } from "$lib/server/validators";
 import { verifyPassword, createAccessToken, createRefreshToken } from "$lib/server/auth";
-import { getCurrentUser } from "$lib/server/getCurrentUser";
+import { getCurrentUser } from "$lib/server/auth";
 import { getNewTokenHeaders } from "$lib/server/auth";
 
 export const POST: RequestHandler = async ({ request }) => {

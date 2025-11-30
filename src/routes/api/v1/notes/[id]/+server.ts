@@ -1,7 +1,7 @@
 import { json, type RequestHandler } from "@sveltejs/kit";
 import { prisma } from "$lib/server/database";
 import { noteSchema } from "$lib/server/validators";
-import { getCurrentUser } from "$lib/server/getCurrentUser";
+import { getCurrentUser } from "$lib/server/auth";
 
 export const GET: RequestHandler = async ({ params, request }) => {
   const user = await getCurrentUser(request);
