@@ -167,7 +167,7 @@ npx prisma db seed
 
 This executes your seed script and inserts the predefined data into the database. Useful for development, testing, or initializing default records.
 
-> [!NOTES]
+> [!NOTE]
 > Always ensure migrations are applied (npx prisma migrate dev) before seeding.
 > Avoid seeding sensitive or production data directly from the seed script.
 
@@ -224,7 +224,7 @@ This executes your seed script and inserts the predefined data into the database
 - argon2 (Password hashing)
 - jose (JWT and cryptography)
 - cookie (Cookie parsing)
-- cookie-signature (Signing cookies)
+- cookie-signature (Signing cookies) - Unused
 
 ### General Schema Validator
 
