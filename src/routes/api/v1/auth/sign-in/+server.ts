@@ -10,6 +10,7 @@ import {
 } from "$lib/server/auth";
 import * as cookie from "cookie";
 import { getCurrentUser } from "$lib/server/getCurrentUser";
+import { dev } from "$app/environment";
 
 export const POST: RequestHandler = async ({ request }) => {
   const currentUser = await getCurrentUser(request);
@@ -36,18 +37,19 @@ export const POST: RequestHandler = async ({ request }) => {
   const refreshToken = await createRefreshToken(user);
   const accessMaxAge = ACCESS_EXPIRES_SECONDS; // 15m in seconds; align with ACCESS_TOKEN_EXPIRES
   const refreshMaxAge = REFRESH_EXPIRES_SECONDS;
+  const isProduction = dev === false;
   const headers = {
     "Set-Cookie": [
       cookie.serialize("access_token", accessToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: isProduction,
         sameSite: "lax",
         path: "/",
         maxAge: accessMaxAge,
       }),
       cookie.serialize("refresh_token", refreshToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: isProduction,
         sameSite: "lax",
         path: "/",
         maxAge: refreshMaxAge,

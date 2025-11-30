@@ -11,7 +11,6 @@ export const POST: RequestHandler = async ({ request }) => {
   }
   const { username, email, password } = parsed.data;
   try {
-    // Check if username or email is already taken
     const existingUser = await prisma.user.findFirst({
       where: {
         OR: [{ username }, { email }],
