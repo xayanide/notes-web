@@ -16,7 +16,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   const { oldPassword, newPassword } = parsed.data;
   const user = await prisma.user.findUnique({ where: { id: localUser.id } });
   if (!user) {
-    return json({ error: "User cannot be found" }, { status: 400 });
+    return json({ error: "User doesn't exist" }, { status: 400 });
   }
   const ok = await verifyPassword(user.password, oldPassword);
   if (!ok) {
