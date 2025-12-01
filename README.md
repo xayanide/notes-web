@@ -223,7 +223,7 @@ This executes your seed script and inserts the predefined data into the database
 
 - argon2 (Password hashing)
 - jose (JWT and cryptography)
-- cookie (Cookie parsing) - Unused - Using SvelteKit cookies api
+- cookie (Cookie parsing) - Unused - Using SvelteKit cookies api instead
 - cookie-signature (Signing cookies) - Unused
 
 ### General Schema Validator

@@ -19,7 +19,7 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
     where: { OR: [{ email: emailOrUsername }, { username: emailOrUsername }] },
   });
   if (!user) {
-    return json({ error: "Invalid identifier" }, { status: 401 });
+    return json({ error: "User doesn't exist" }, { status: 401 });
   }
   const success = await verifyPassword(user.password, password);
   if (!success) {

@@ -11,7 +11,7 @@ import {
 } from "$env/static/private";
 import { dev } from "$app/environment";
 import parseDuration from "parse-duration";
-import type { Cookies } from "@sveltejs/kit";
+import type { Cookies, RequestEvent } from "@sveltejs/kit";
 
 const textEncoder = new TextEncoder();
 
@@ -214,4 +214,18 @@ export function getSanitizedUser(user: User) {
     role: user.role,
     createdAt: user.createdAt,
   };
+}
+
+export function onSiginInRedirect(
+  event: RequestEvent,
+  message: string = "You must be signed in to access this page",
+) {
+  const eventUrl = event.url;
+  const redirectTo = `${eventUrl.pathname}${eventUrl.search}`;
+  return `/sign-in?redirectTo${redirectTo}&message=${message}`;
+}
+
+export function redirectTest(event: RequestEvent) {
+  const redirectTo = event.url.searchParams.get("redirectTo") || "";
+  return `/${redirectTo.slice(1)}`;
 }
