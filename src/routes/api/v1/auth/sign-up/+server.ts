@@ -1,6 +1,6 @@
 import { json, type RequestHandler } from "@sveltejs/kit";
 import { prisma } from "$lib/server/database";
-import { signUpSchema } from "$lib/server/validators";
+import { signUpSchema } from "$lib/validators";
 import { getHashedPassword } from "$lib/server/auth";
 
 export const POST: RequestHandler = async ({ request }) => {
@@ -19,7 +19,7 @@ export const POST: RequestHandler = async ({ request }) => {
     if (existingUser) {
       if (existingUser.username === username) {
         return json(
-          { error: "Username is already taken" },
+          { error: `Username ${username} is not available` },
           {
             status: 409,
           },
@@ -27,7 +27,7 @@ export const POST: RequestHandler = async ({ request }) => {
       }
       if (existingUser.email === email) {
         return json(
-          { error: "Email is already taken" },
+          { error: `Email ${email} is not available` },
           {
             status: 409,
           },

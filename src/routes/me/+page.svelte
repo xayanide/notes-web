@@ -10,10 +10,11 @@
 
 {#if data.user}
   <p>User ID: {data.user.id}</p>
+  <p>Name: {data.user.name}</p>
   <p>Username: {data.user.username}</p>
   <p>Email: {data.user.email}</p>
   <p>Created at: {data.user.createdAt}</p>
-  <a href="/change-password">Change Password</a>
+  <a href="/change-password">Change password</a>
 {:else}
   <p>You are not signed in.</p>
 {/if}

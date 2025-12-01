@@ -1,14 +1,13 @@
 import { json, type RequestHandler } from "@sveltejs/kit";
 import { prisma } from "$lib/server/database";
-import { signInSchema } from "$lib/server/validators";
+import { signInSchema } from "$lib/validators";
 import { verifyPassword, createAccessToken, createRefreshToken } from "$lib/server/auth";
-import { getCurrentUser } from "$lib/server/auth";
 import { getNewTokenHeaders } from "$lib/server/auth";
 
-export const POST: RequestHandler = async ({ request }) => {
-  const currentUser = await getCurrentUser(request);
-  if (currentUser) {
-    return json({ error: "Already signed in" }, { status: 400 });
+export const POST: RequestHandler = async ({ request, locals }) => {
+  const localUser = locals.user;
+  if (localUser) {
+    return json("You are already signed in", { status: 200 });
   }
   const body = await request.json();
   const parsed = signInSchema.safeParse(body);
@@ -24,7 +23,7 @@ export const POST: RequestHandler = async ({ request }) => {
   }
   const success = await verifyPassword(user.password, password);
   if (!success) {
-    return json({ error: "Invalid password" }, { status: 401 });
+    return json({ error: "Incorrect password" }, { status: 401 });
   }
   const accessToken = await createAccessToken(user);
   const refreshToken = await createRefreshToken(user);

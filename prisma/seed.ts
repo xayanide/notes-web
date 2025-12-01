@@ -15,17 +15,15 @@ async function getHashedPassword(password: string) {
 
 export async function main() {
   console.log("Seeding database...");
-  /**
   await prisma.refreshToken.deleteMany({});
   await prisma.note.deleteMany({});
   await prisma.user.deleteMany({});
-  */
   const user = await prisma.user.create({
     data: {
       username: "user",
       email: "user@example.com",
       password: await getHashedPassword("userpass"),
-      role: "USER",
+      role: "REGULAR",
     },
   });
   const admin = await prisma.user.create({
@@ -38,28 +36,28 @@ export async function main() {
   });
   await prisma.note.create({
     data: {
-      title: "Hello world note 1",
+      title: "User Note 1",
       content: "This belongs to USER account",
       userId: user.id,
     },
   });
   await prisma.note.create({
     data: {
-      title: "Hello world note2",
+      title: "User Note 2",
       content: "This belongs to USER account",
       userId: user.id,
     },
   });
   await prisma.note.create({
     data: {
-      title: "Admin note 1",
+      title: "Admin Note 1",
       content: "This one belongs to the admin",
       userId: admin.id,
     },
   });
   await prisma.note.create({
     data: {
-      title: "Admin note 2",
+      title: "Admin Note 2",
       content: "This one belongs to the admin",
       userId: admin.id,
     },

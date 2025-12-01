@@ -40,19 +40,19 @@ export const GET: RequestHandler = async ({ params }) => {
   );
 };
 
-export const PATCH: RequestHandler = async ({ request, params }) => {
-  const user = await getCurrentUser(request);
-  if (!user) {
+export const PATCH: RequestHandler = async ({ request, params, locals }) => {
+  const localUser = locals.user;
+  if (!localUser) {
     throw error(401, "Unauthorized");
   }
   const targetUserId = Number(params.id);
   const body = await request.json();
-  const isAdmin = user.role === "ADMIN";
-  const isSelf = user.id === targetUserId;
+  const isAdmin = localUser.role === "ADMIN";
+  const isSelf = localUser.id === targetUserId;
   if (!isAdmin) {
     throw error(403, "Forbidden");
   }
-  if (isSelf && body.role && body.role !== user.role) {
+  if (isSelf && body.role && body.role !== localUser.role) {
     throw error(403, "Admins cannot change their own role");
   }
   let data: any = {};
@@ -66,7 +66,7 @@ export const PATCH: RequestHandler = async ({ request, params }) => {
     data.password = await getHashedPassword(body.password);
   }
   if (!isSelf && body.role) {
-    if (["ADMIN", "USER"].includes(body.role)) {
+    if (["ADMIN", "REGULAR"].includes(body.role)) {
       data.role = body.role;
     }
   }

@@ -6,9 +6,8 @@
   <title>User{data.user ? ` - ${data.user.username}` : ""}</title>
 </svelte:head>
 
-<h1>User Profile</h1>
-
 {#if data.user}
+  <h1>User profile</h1>
   <p>ID: {data.user.id}</p>
   <p>Username: {data.user.username}</p>
   <p>Role: {data.user.role}</p>

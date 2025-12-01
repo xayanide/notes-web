@@ -1,27 +1,26 @@
 import { json, type RequestHandler } from "@sveltejs/kit";
 import { prisma } from "$lib/server/database";
-import { noteSchema } from "$lib/server/validators";
-import { getCurrentUser } from "$lib/server/auth";
+import { noteSchema } from "$lib/validators";
 
-export const GET: RequestHandler = async ({ params, request }) => {
-  const user = await getCurrentUser(request);
-  if (!user) {
-    return json(null, { status: 401 });
+export const GET: RequestHandler = async ({ params, locals }) => {
+  const localUser = locals.user;
+  if (!localUser) {
+    return json("Unauthorized", { status: 401 });
   }
   const note = await prisma.note.findUnique({ where: { id: Number(params.id) } });
-  if (!note || note.userId !== user.id) {
+  if (!note || note.userId !== localUser.id) {
     return json(null, { status: 404 });
   }
   return json(note, { status: 200 });
 };
 
-export const PUT: RequestHandler = async ({ params, request }) => {
-  const user = await getCurrentUser(request);
-  if (!user) {
-    return json(null, { status: 401 });
+export const PUT: RequestHandler = async ({ params, request, locals }) => {
+  const localUser = locals.user;
+  if (!localUser) {
+    return json("Unauthorized", { status: 401 });
   }
   const note = await prisma.note.findUnique({ where: { id: Number(params.id) } });
-  if (!note || note.userId !== user.id) {
+  if (!note || note.userId !== localUser.id) {
     return json(null, { status: 404 });
   }
   const body = await request.json();
@@ -36,13 +35,13 @@ export const PUT: RequestHandler = async ({ params, request }) => {
   return json(updated, { status: 200 });
 };
 
-export const DELETE: RequestHandler = async ({ params, request }) => {
-  const user = await getCurrentUser(request);
-  if (!user) {
-    return json(null, { status: 401 });
+export const DELETE: RequestHandler = async ({ params, locals }) => {
+  const localUser = locals.user;
+  if (!localUser) {
+    return json("Unauthorized", { status: 401 });
   }
   const note = await prisma.note.findUnique({ where: { id: Number(params.id) } });
-  if (!note || note.userId !== user.id) {
+  if (!note || note.userId !== localUser.id) {
     return json(null, { status: 404 });
   }
   await prisma.note.delete({ where: { id: Number(params.id) } });

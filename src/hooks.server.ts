@@ -1,14 +1,21 @@
-import { type Handle } from "@sveltejs/kit";
-import * as cookie from "cookie";
+import { getCurrentUser, refreshAccessToken } from "$lib/server/auth";
 
-export const handle: Handle = async ({ event, resolve }) => {
-  const cookies = cookie.parse(event.request.headers.get("cookie") || "");
-  const accessToken = cookies.access_token;
-  if (!accessToken && !event.url.pathname.startsWith("/api/v1/auth/refresh")) {
-    const res = await event.fetch("/api/v1/auth/refresh", { method: "POST" });
-    if (!res.ok) {
-      return resolve(event);
-    }
+export const handle = async ({ event, resolve }) => {
+  const request = event.request;
+  const user = await getCurrentUser(request);
+  if (user) {
+    event.locals.user = user;
+    return await resolve(event);
   }
-  return resolve(event);
+  const refreshed = await refreshAccessToken(request);
+  if (!refreshed) {
+    return await resolve(event);
+  }
+  event.locals.user = refreshed.user;
+  const response = await resolve(event);
+  const refreshHeaders = refreshed.headers.get("Set-Cookie");
+  if (refreshHeaders) {
+    response.headers.set("Set-Cookie", refreshHeaders);
+  }
+  return response;
 };

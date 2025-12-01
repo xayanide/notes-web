@@ -11,14 +11,11 @@
 <form method="post">
   <label>Username</label>
   <input name="username" required />
-
   <label>Email</label>
   <input name="email" type="email" required />
-
   <label>Password</label>
   <input name="password" type="password" required minlength="8" />
-
-  <button type="submit">Create Account</button>
+  <button type="submit">Sign up</button>
 </form>
 
 {#if form?.error}

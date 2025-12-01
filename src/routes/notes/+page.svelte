@@ -24,7 +24,6 @@
       </div>
     </form>
   </section>
-
   <section>
     <h2>Your Existing Notes</h2>
     <ul>

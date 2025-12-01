@@ -9,10 +9,11 @@ datasource db {
 
 model User {
   id            Int            @id @default(autoincrement())
+  name          String?
   username      String         @unique
   email         String         @unique
   password      String
-  role          String         @default("USER")
+  role          String         @default("REGULAR")
   notes         Note[]
   refreshTokens RefreshToken[]
   createdAt     DateTime       @default(now())

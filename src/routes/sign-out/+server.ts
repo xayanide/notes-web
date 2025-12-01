@@ -6,5 +6,5 @@ export const GET: RequestHandler = () => {
   headers.set("Location", "/sign-in");
   headers.append("Set-Cookie", cookie.serialize("access_token", "", { maxAge: 0, path: "/" }));
   headers.append("Set-Cookie", cookie.serialize("refresh_token", "", { maxAge: 0, path: "/" }));
-  return json(null, { status: 302, headers });
+  return json("signed out", { status: 302, headers });
 };
