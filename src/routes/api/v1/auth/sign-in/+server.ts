@@ -7,7 +7,7 @@ import { getNewTokenHeaders } from "$lib/server/auth";
 export const POST: RequestHandler = async ({ request, locals, cookies }) => {
   const localUser = locals.user;
   if (localUser) {
-    return json("You are already signed in", { status: 200 });
+    return json({ message: "Already signed in" }, { status: 200 });
   }
   const body = await request.json();
   const parsed = signInSchema.safeParse(body);
