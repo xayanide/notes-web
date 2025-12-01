@@ -1,5 +1,12 @@
 import { redirect, type Actions } from "@sveltejs/kit";
 
+export const load = ({ locals }) => {
+  const localUser = locals.user;
+  if (localUser) {
+    throw redirect(307, "/me");
+  }
+};
+
 export const actions: Actions = {
   default: async (event) => {
     const fd = await event.request.formData();

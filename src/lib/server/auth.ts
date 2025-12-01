@@ -144,7 +144,12 @@ export function getNewTokenHeaders(cookies: Cookies, accessToken: string, refres
   return headers;
 }
 
-export function getClearTokenHeaders(cookies: Cookies) {
+export function deleteCookies(cookies: Cookies) {
+  cookies.delete("access_token", { path: "/" });
+  cookies.delete("refresh_token", { path: "/" });
+}
+
+export function getDeleteTokenHeaders(cookies: Cookies) {
   const headers = new Headers();
   headers.append(
     "Set-Cookie",
