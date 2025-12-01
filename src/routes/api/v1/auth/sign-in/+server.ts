@@ -2,7 +2,7 @@ import { json, type RequestHandler } from "@sveltejs/kit";
 import { prisma } from "$lib/server/database";
 import { signInSchema } from "$lib/validators";
 import { verifyPassword, createAccessToken, createRefreshToken } from "$lib/server/auth";
-import { getNewTokenHeaders } from "$lib/server/auth";
+import { setNewCookies } from "$lib/server/auth";
 
 export const POST: RequestHandler = async ({ request, locals, cookies }) => {
   const localUser = locals.user;
@@ -27,6 +27,6 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
   }
   const accessToken = await createAccessToken(user);
   const refreshToken = await createRefreshToken(user);
-  const headers = getNewTokenHeaders(cookies, accessToken, refreshToken);
-  return json({ message: "ok" }, { status: 200, headers });
+  setNewCookies(cookies, accessToken, refreshToken);
+  return json({ message: "ok" }, { status: 200 });
 };
