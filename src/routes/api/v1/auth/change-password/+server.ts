@@ -1,26 +1,31 @@
 import { json, type RequestHandler } from "@sveltejs/kit";
-import { prisma } from "$lib/server/database";
 import { getHashedPassword, verifyPassword } from "$lib/server/auth";
+import { prisma } from "$lib/server/database";
 import { changePasswordSchema } from "$lib/validators";
 
 export const POST: RequestHandler = async ({ request, locals }) => {
   const localUser = locals.user;
   if (!localUser) {
-    return json("Unauthorized", { status: 401 });
+    return json({ error: "Unauthorized" }, { status: 401 });
   }
-  const fd = Object.fromEntries(await request.formData());
-  const parsed = changePasswordSchema.safeParse(fd);
+  const formData = await request.formData();
+  const parsed = changePasswordSchema.safeParse({
+    oldPassword: formData.get("oldPassword"),
+    newPassword: formData.get("newPassword"),
+  });
   if (!parsed.success) {
-    return json({ error: "Invalid current or new password" }, { status: 400 });
+    return json({ error: parsed.error }, { status: 400 });
   }
   const { oldPassword, newPassword } = parsed.data;
-  const user = await prisma.user.findUnique({ where: { id: localUser.id } });
+  const user = await prisma.user.findUnique({
+    where: { id: localUser.id },
+  });
   if (!user) {
     return json({ error: "User doesn't exist" }, { status: 400 });
   }
   const ok = await verifyPassword(user.password, oldPassword);
   if (!ok) {
-    return json({ error: "Incorrect password" }, { status: 400 });
+    return json({ error: "Incorrect current password" }, { status: 400 });
   }
   const hashedPassword = await getHashedPassword(newPassword);
   await prisma.user.update({
