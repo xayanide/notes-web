@@ -145,19 +145,43 @@ export function getNewTokenHeaders(cookies: Cookies, accessToken: string, refres
 }
 
 export function deleteCookies(cookies: Cookies) {
-  cookies.delete("access_token", { path: "/" });
-  cookies.delete("refresh_token", { path: "/" });
+  const isProduction = dev === false;
+  cookies.delete("access_token", {
+    path: "/",
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: "lax",
+  });
+  cookies.delete("refresh_token", {
+    path: "/",
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: "lax",
+  });
 }
 
 export function getDeleteTokenHeaders(cookies: Cookies) {
+  const isProduction = dev === false;
   const headers = new Headers();
   headers.append(
     "Set-Cookie",
-    cookies.serialize("access_token", "", { httpOnly: true, path: "/", maxAge: 0 }),
+    cookies.serialize("access_token", "", {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 0,
+    }),
   );
   headers.append(
     "Set-Cookie",
-    cookies.serialize("refresh_token", "", { httpOnly: true, path: "/", maxAge: 0 }),
+    cookies.serialize("refresh_token", "", {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 0,
+    }),
   );
   return headers;
 }
