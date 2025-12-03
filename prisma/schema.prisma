@@ -14,6 +14,7 @@ model User {
   email         String         @unique
   password      String
   role          String         @default("REGULAR")
+  status        String         @default("PENDING")
   notes         Note[]
   refreshTokens RefreshToken[]
   createdAt     DateTime       @default(now())
@@ -38,4 +39,16 @@ model RefreshToken {
   expiresAt DateTime
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+enum UserStatus {
+  PENDING
+  INACTIVE
+  ACTIVE
+  BANNED
+}
+
+enum UserRole {
+  REGULAR
+  ADMIN
 }
