@@ -13,8 +13,8 @@ model User {
   username      String         @unique
   email         String         @unique
   password      String
-  status        UserStatus         @default(PENDING)
-  role          UserRole         @default(REGULAR)
+  status        UserStatus     @default(PENDING)
+  role          UserRole       @default(REGULAR)
   notes         Note[]
   refreshTokens RefreshToken[]
   createdAt     DateTime       @default(now())
