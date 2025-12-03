@@ -235,6 +235,7 @@ export function getSanitizedUser(user: User) {
     name: user.name,
     username: user.username,
     email: user.email,
+    status: user.status,
     role: user.role,
     createdAt: user.createdAt,
   };
