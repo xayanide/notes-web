@@ -236,8 +236,8 @@ export async function getCurrentUserOrRefresh(cookies: Cookies) {
   if (!refreshTokenPayload) {
     return null;
   }
-  const now = Math.floor(Date.now() / 1000);
-  if (refreshTokenPayload.exp <= now) {
+  const nowSec = Math.floor(Date.now() / 1000);
+  if (refreshTokenPayload.exp <= nowSec) {
     return null;
   }
   const result = await prisma.$transaction(async (tx) => {
