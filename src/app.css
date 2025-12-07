@@ -5,6 +5,28 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@source "../node_modules/simple-datatables/dist";
+@source "../node_modules/@flowbite-svelte-plugins/datatable/dist";
+@source "../node_modules/@flowbite-svelte-plugins/chart/dist";
+@source "../node_modules/@flowbite-svelte-plugins/texteditor/dist";
+@source "../node_modules/flowbite-svelte/dist";
+@source "../node_modules/flowbite-svelte-icons/dist";
+@source "../node_modules/flowbite-svelte-blocks/dist";
+
+.datatable-pagination .datatable-active a,
+.datatable-pagination .datatable-active a:focus,
+.datatable-pagination .datatable-active a:hover,
+.datatable-pagination .datatable-active button,
+.datatable-pagination .datatable-active button:focus,
+.datatable-pagination .datatable-active button:hover {
+  background-color: #ffffff;
+  cursor: default;
+}
+
+.datatable-wrapper .datatable-table tbody tr.selected {
+  background-color: #ffffff !important;
+}
+
 @theme {
   --color-primary-50: #fff5f2;
   --color-primary-100: #fff1ee;
@@ -27,26 +49,6 @@
   --color-secondary-700: #0369a1;
   --color-secondary-800: #075985;
   --color-secondary-900: #0c4a6e;
-}
-
-@source "../../node_modules/flowbite-svelte/dist";
-@source "../../node_modules/flowbite-svelte-icons/dist";
-
-@source "../../node_modules/simple-datatables/dist";
-@source "../../node_modules/@flowbite-svelte-plugins/datatable/dist";
-
-.datatable-pagination .datatable-active a,
-.datatable-pagination .datatable-active a:focus,
-.datatable-pagination .datatable-active a:hover,
-.datatable-pagination .datatable-active button,
-.datatable-pagination .datatable-active button:focus,
-.datatable-pagination .datatable-active button:hover {
-  background-color: #ffe4de;
-  cursor: default;
-}
-
-.datatable-wrapper .datatable-table tbody tr.selected {
-  background-color: #fff1ee !important;
 }
 
 @layer base {

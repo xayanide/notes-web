@@ -8,17 +8,18 @@ datasource db {
 }
 
 model User {
-  id            Int            @id @default(autoincrement())
-  name          String?
-  username      String         @unique
-  email         String         @unique
-  password      String
-  status        UserStatus     @default(PENDING)
-  role          UserRole       @default(REGULAR)
-  notes         Note[]
-  refreshTokens RefreshToken[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id                 Int            @id @default(autoincrement())
+  name               String?
+  username           String         @unique
+  email              String         @unique
+  password           String
+  status             UserStatus     @default(PENDING)
+  role               UserRole       @default(REGULAR)
+  notes              Note[]
+  accessTokenVersion Int            @default(0)
+  refreshTokens      RefreshToken[]
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
 }
 
 model Note {

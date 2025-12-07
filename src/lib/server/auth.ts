@@ -8,10 +8,14 @@ import {
   REFRESH_TOKEN_EXPIRES,
   JWT_ACCESS_SECRET,
   JWT_REFRESH_SECRET,
+  IS_LAN,
 } from "$env/static/private";
 import { dev } from "$app/environment";
 import parseDuration from "parse-duration";
 import type { Cookies, RequestEvent } from "@sveltejs/kit";
+
+const IS_LAN_PRODUCTION = Boolean(IS_LAN ?? false);
+const IS_WEB_PRODUCTION = dev === false && IS_LAN_PRODUCTION === false;
 
 const textEncoder = new TextEncoder();
 
@@ -27,7 +31,12 @@ const JWT_PROTECTED_HEADERS = { alg: "HS256", typ: "JWT" };
 
 type AccessTokenPayload = {
   userId: number;
-  role: string;
+  userRole: string;
+  userStatus: string;
+  // a basic solution, nothing crazy but deviates from jwt's supposed stateless nature,
+  // this is used to invalidate old access tokens when the user revokes all sessions, one of the big flaws of JWT
+  // which is access token invalidation
+  version: number;
   iat: number;
   exp: number;
 };
@@ -41,16 +50,21 @@ type RefreshTokenPayload = {
 
 export async function getHashedPassword(password: string) {
   // because argon2id is used by default in many argon2 packages
-  return argon2.hash(password, { type: argon2.argon2id });
+  return await argon2.hash(password, { type: argon2.argon2id });
 }
 
 export async function verifyPassword(hashedPassword: string, password: string) {
-  return argon2.verify(hashedPassword, password);
+  return await argon2.verify(hashedPassword, password);
 }
 
 export async function createAccessToken(user: User) {
   const now = Math.floor(Date.now() / 1000);
-  const jwtBuilder = new SignJWT({ userId: user.id, role: user.role });
+  const jwtBuilder = new SignJWT({
+    userId: user.id,
+    userRole: user.role,
+    userStatus: user.status,
+    version: user.accessTokenVersion,
+  });
   jwtBuilder.setProtectedHeader(JWT_PROTECTED_HEADERS);
   jwtBuilder.setIssuedAt(now);
   jwtBuilder.setExpirationTime(now + ACCESS_EXPIRES_SECONDS);
@@ -61,14 +75,15 @@ export async function createAccessToken(user: User) {
 export async function createRefreshToken(user: User) {
   const now = Math.floor(Date.now() / 1000);
   const uuid = nodeCrypto.randomUUID();
-  const jwtBuilder = new SignJWT({ userId: user.id, jti: uuid });
+  const userId = user.id;
+  const jwtBuilder = new SignJWT({ userId, jti: uuid });
   jwtBuilder.setProtectedHeader(JWT_PROTECTED_HEADERS);
   jwtBuilder.setIssuedAt(now);
   jwtBuilder.setExpirationTime(now + REFRESH_EXPIRES_SECONDS);
   const refreshToken = await jwtBuilder.sign(REFRESH_SECRET);
   const expiresAt = new Date(Date.now() + REFRESH_EXPIRES_SECONDS * 1000);
   await prisma.refreshToken.create({
-    data: { token: refreshToken, userId: user.id, expiresAt },
+    data: { token: refreshToken, userId, expiresAt },
   });
   return refreshToken;
 }
@@ -95,37 +110,43 @@ export async function revokeRefreshToken(token: string) {
   return await prisma.refreshToken.deleteMany({ where: { token } });
 }
 
+export async function revokeAllTokens(userId: number) {
+  await prisma.user.update({
+    where: { id: userId },
+    data: { accessTokenVersion: { increment: 1 } },
+  });
+  return await prisma.refreshToken.deleteMany({ where: { userId } });
+}
+
 export async function rotateRefreshToken(user: User, token: string) {
   await revokeRefreshToken(token);
   return await createRefreshToken(user);
 }
 
 export function setNewCookies(cookies: Cookies, accessToken: string, refreshToken: string) {
-  const isProduction = dev === false;
   cookies.set("access_token", accessToken, {
     path: "/",
     httpOnly: true,
-    secure: isProduction,
+    secure: IS_WEB_PRODUCTION,
     sameSite: "lax",
     maxAge: ACCESS_EXPIRES_SECONDS,
   });
   cookies.set("refresh_token", refreshToken, {
     path: "/",
     httpOnly: true,
-    secure: isProduction,
+    secure: IS_WEB_PRODUCTION,
     sameSite: "lax",
     maxAge: REFRESH_EXPIRES_SECONDS,
   });
 }
 
 export function getNewTokenHeaders(cookies: Cookies, accessToken: string, refreshToken: string) {
-  const isProduction = dev === false;
   const headers = new Headers();
   headers.append(
     "Set-Cookie",
     cookies.serialize("access_token", accessToken, {
       httpOnly: true,
-      secure: isProduction,
+      secure: IS_WEB_PRODUCTION,
       sameSite: "lax",
       path: "/",
       maxAge: ACCESS_EXPIRES_SECONDS,
@@ -135,7 +156,7 @@ export function getNewTokenHeaders(cookies: Cookies, accessToken: string, refres
     "Set-Cookie",
     cookies.serialize("refresh_token", refreshToken, {
       httpOnly: true,
-      secure: isProduction,
+      secure: IS_WEB_PRODUCTION,
       sameSite: "lax",
       path: "/",
       maxAge: REFRESH_EXPIRES_SECONDS,
@@ -145,29 +166,27 @@ export function getNewTokenHeaders(cookies: Cookies, accessToken: string, refres
 }
 
 export function deleteCookies(cookies: Cookies) {
-  const isProduction = dev === false;
   cookies.delete("access_token", {
-    path: "/",
     httpOnly: true,
-    secure: isProduction,
+    secure: IS_WEB_PRODUCTION,
     sameSite: "lax",
+    path: "/",
   });
   cookies.delete("refresh_token", {
-    path: "/",
     httpOnly: true,
-    secure: isProduction,
+    secure: IS_WEB_PRODUCTION,
     sameSite: "lax",
+    path: "/",
   });
 }
 
 export function getDeleteTokenHeaders(cookies: Cookies) {
-  const isProduction = dev === false;
   const headers = new Headers();
   headers.append(
     "Set-Cookie",
     cookies.serialize("access_token", "", {
       httpOnly: true,
-      secure: isProduction,
+      secure: IS_WEB_PRODUCTION,
       sameSite: "lax",
       path: "/",
       maxAge: 0,
@@ -177,13 +196,51 @@ export function getDeleteTokenHeaders(cookies: Cookies) {
     "Set-Cookie",
     cookies.serialize("refresh_token", "", {
       httpOnly: true,
-      secure: isProduction,
+      secure: IS_WEB_PRODUCTION,
       sameSite: "lax",
       path: "/",
       maxAge: 0,
     }),
   );
   return headers;
+}
+
+export async function getCurrentUserOrRefresh(cookies: Cookies) {
+  const accessToken = cookies.get("access_token");
+  if (accessToken) {
+    const accessTokenPayload = await verifyAccessToken(accessToken);
+    if (accessTokenPayload) {
+      const user = await prisma.user.findUnique({ where: { id: accessTokenPayload.userId } });
+      if (
+        user &&
+        accessTokenPayload.version === user.accessTokenVersion &&
+        !["PENDING", "INACTIVE", "BANNED"].includes(user.status)
+      ) {
+        return getSanitizedUser(user);
+      }
+    }
+  }
+  const refreshToken = cookies.get("refresh_token");
+  if (refreshToken) {
+    const refreshTokenPayload = await verifyRefreshToken(refreshToken);
+    if (refreshTokenPayload) {
+      const tokenRow = await prisma.refreshToken.findUnique({
+        where: { token: refreshToken },
+        include: { user: true },
+      });
+      if (
+        tokenRow &&
+        tokenRow.expiresAt.getTime() > Date.now() &&
+        !["PENDING", "INACTIVE", "BANNED"].includes(tokenRow.user.status)
+      ) {
+        const newRefreshToken = await rotateRefreshToken(tokenRow.user, refreshToken);
+        const newAccessToken = await createAccessToken(tokenRow.user);
+        setNewCookies(cookies, newAccessToken, newRefreshToken);
+        return getSanitizedUser(tokenRow.user);
+      }
+    }
+  }
+  return null;
 }
 
 export async function getCurrentUser(cookies: Cookies) {
@@ -197,6 +254,12 @@ export async function getCurrentUser(cookies: Cookies) {
   }
   const user = await prisma.user.findUnique({ where: { id: payload.userId } });
   if (!user) {
+    return null;
+  }
+  if (payload.version !== user.accessTokenVersion) {
+    return null;
+  }
+  if (["PENDING", "INACTIVE", "BANNED"].includes(user.status)) {
     return null;
   }
   return getSanitizedUser(user);
@@ -223,6 +286,9 @@ export async function refreshAccessToken(cookies: Cookies) {
   if (!user) {
     return null;
   }
+  if (["PENDING", "INACTIVE", "BANNED"].includes(user.status)) {
+    return null;
+  }
   const newRefreshToken = await rotateRefreshToken(user, refreshToken);
   const newAccessToken = await createAccessToken(user);
   setNewCookies(cookies, newAccessToken, newRefreshToken);
@@ -247,7 +313,7 @@ export function onSiginInRedirect(
 ) {
   const eventUrl = event.url;
   const redirectTo = `${eventUrl.pathname}${eventUrl.search}`;
-  return `/sign-in?redirectTo${redirectTo}&message=${message}`;
+  return `/sign-in?redirectTo=${redirectTo}&message=${message}`;
 }
 
 export function redirectTest(event: RequestEvent) {

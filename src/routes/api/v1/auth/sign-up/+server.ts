@@ -11,7 +11,10 @@ export const POST: RequestHandler = async ({ request }) => {
     password: formData.get("password"),
   });
   if (!parsed.success) {
-    return json({ error: "Invalid username, email, or password format" }, { status: 400 });
+    return json(
+      { error: "Invalid username, email, or password format", formData },
+      { status: 400 },
+    );
   }
   const { username, email, password } = parsed.data;
   const existingUser = await prisma.user.findFirst({
@@ -21,7 +24,7 @@ export const POST: RequestHandler = async ({ request }) => {
   });
   if (existingUser && existingUser.username === username) {
     return json(
-      { error: `Username "${username}" is already taken` },
+      { error: `Username "${username}" is already taken`, formData },
       {
         status: 409,
       },
@@ -29,13 +32,15 @@ export const POST: RequestHandler = async ({ request }) => {
   }
   if (existingUser && existingUser.email === email) {
     return json(
-      { error: `Email "${email}" is already in use` },
+      { error: `Email "${email}" is already in use`, formData },
       {
         status: 409,
       },
     );
   }
   const hashedPassword = await getHashedPassword(password);
-  await prisma.user.create({ data: { username, email, password: hashedPassword } });
+  await prisma.user.create({
+    data: { username, email, password: hashedPassword },
+  });
   return json({ message: "Signed up successfully" }, { status: 201 });
 };

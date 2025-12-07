@@ -14,7 +14,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     newPassword: formData.get("newPassword"),
   });
   if (!parsed.success) {
-    return json({ error: parsed.error }, { status: 400 });
+    return json({ error: "Invalid current or new password format" }, { status: 400 });
   }
   const { oldPassword, newPassword } = parsed.data;
   const user = await prisma.user.findUnique({

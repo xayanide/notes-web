@@ -4,14 +4,17 @@ declare global {
   namespace App {
     // interface Error {}
     interface Locals {
-      user: {
-        id: number;
-        name: string | null;
-        username: string;
-        email: string;
-        role: string;
-        createdAt: Date;
-      };
+      user:
+        | {
+            id: number;
+            name: string | null;
+            username: string;
+            email: string;
+            status: UserStatus;
+            role: UserRole;
+            createdAt: Date;
+          }
+        | undefined;
     }
     // interface PageData {}
     // interface PageState {}
