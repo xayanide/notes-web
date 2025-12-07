@@ -70,8 +70,7 @@ export async function getNewAccessToken(user: User) {
   jwtBuilder.setProtectedHeader(JWT_PROTECTED_HEADERS);
   jwtBuilder.setIssuedAt(nowSec);
   jwtBuilder.setExpirationTime(nowSec + ACCESS_EXPIRES_SECONDS);
-  const accessToken = await jwtBuilder.sign(ACCESS_SECRET_KEY);
-  return accessToken;
+  return await jwtBuilder.sign(ACCESS_SECRET_KEY);
 }
 
 export async function getNewRefreshToken(user: User) {
