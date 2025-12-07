@@ -3,9 +3,9 @@ import { prisma } from "$lib/server/database";
 import { signInSchema } from "$lib/validators";
 import {
   verifyPassword,
-  createAccessToken,
-  createRefreshToken,
   setSessionCookies,
+  getNewAccessToken,
+  getNewRefreshToken,
 } from "$lib/server/auth";
 
 export const POST: RequestHandler = async ({ request, locals, cookies }) => {
@@ -42,8 +42,8 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
   if (userStatus === "BANNED") {
     return json({ error: "User currently banned" }, { status: 403 });
   }
-  const accessToken = await createAccessToken(user);
-  const refreshToken = await createRefreshToken(user);
+  const accessToken = await getNewAccessToken(user);
+  const refreshToken = await getNewRefreshToken(user);
   setSessionCookies(cookies, accessToken, refreshToken);
   return json({ message: "Signed in successfully" }, { status: 200 });
 };

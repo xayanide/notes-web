@@ -20,8 +20,8 @@ const IS_WEB_PRODUCTION = dev === false && IS_LAN_PRODUCTION === false;
 
 const textEncoder = new TextEncoder();
 
-const ACCESS_SECRET = textEncoder.encode(JWT_ACCESS_SECRET);
-const REFRESH_SECRET = textEncoder.encode(JWT_REFRESH_SECRET);
+const ACCESS_SECRET_KEY = textEncoder.encode(JWT_ACCESS_SECRET);
+const REFRESH_SECRET_KEY = textEncoder.encode(JWT_REFRESH_SECRET);
 
 // this is the preferred way of doing it. the consequence in development is
 // when changing values of .env on these, hot reloads will not reflect the current values
@@ -58,7 +58,7 @@ export async function verifyPassword(hashedPassword: string, password: string) {
   return await argon2.verify(hashedPassword, password);
 }
 
-export async function createAccessToken(user: User) {
+export async function getNewAccessToken(user: User) {
   const now = Math.floor(Date.now() / 1000);
   const jwtBuilder = new SignJWT({
     userId: user.id,
@@ -69,11 +69,11 @@ export async function createAccessToken(user: User) {
   jwtBuilder.setProtectedHeader(JWT_PROTECTED_HEADERS);
   jwtBuilder.setIssuedAt(now);
   jwtBuilder.setExpirationTime(now + ACCESS_EXPIRES_SECONDS);
-  const accessToken = await jwtBuilder.sign(ACCESS_SECRET);
+  const accessToken = await jwtBuilder.sign(ACCESS_SECRET_KEY);
   return accessToken;
 }
 
-export async function createRefreshToken(user: User) {
+export async function getNewRefreshToken(user: User) {
   const now = Math.floor(Date.now() / 1000);
   const uuid = nodeCrypto.randomUUID();
   const userId = user.id;
@@ -81,7 +81,7 @@ export async function createRefreshToken(user: User) {
   jwtBuilder.setProtectedHeader(JWT_PROTECTED_HEADERS);
   jwtBuilder.setIssuedAt(now);
   jwtBuilder.setExpirationTime(now + REFRESH_EXPIRES_SECONDS);
-  const refreshToken = await jwtBuilder.sign(REFRESH_SECRET);
+  const refreshToken = await jwtBuilder.sign(REFRESH_SECRET_KEY);
   const expiresAt = new Date(Date.now() + REFRESH_EXPIRES_SECONDS * 1000);
   await prisma.refreshToken.create({
     data: { token: refreshToken, userId, expiresAt },
@@ -89,18 +89,18 @@ export async function createRefreshToken(user: User) {
   return refreshToken;
 }
 
-export async function verifyAccessToken(token: string) {
+export async function getAccessTokenPayload(token: string) {
   try {
-    const { payload } = await jwtVerify(token, ACCESS_SECRET);
+    const { payload } = await jwtVerify(token, ACCESS_SECRET_KEY);
     return payload as AccessTokenPayload;
   } catch {
     return null;
   }
 }
 
-export async function verifyRefreshToken(token: string) {
+export async function getRefreshTokenPayload(token: string) {
   try {
-    const { payload } = await jwtVerify(token, REFRESH_SECRET);
+    const { payload } = await jwtVerify(token, REFRESH_SECRET_KEY);
     return payload as RefreshTokenPayload;
   } catch {
     return null;
@@ -119,9 +119,9 @@ export async function revokeAllTokens(userId: number) {
   return await prisma.refreshToken.deleteMany({ where: { userId } });
 }
 
-export async function rotateRefreshToken(user: User, token: string) {
+export async function getNextRefreshToken(user: User, token: string) {
   await revokeRefreshToken(token);
-  return await createRefreshToken(user);
+  return await getNewRefreshToken(user);
 }
 
 export function setSessionCookies(cookies: Cookies, accessToken: string, refreshToken: string) {
@@ -207,15 +207,15 @@ export function getDeleteSessionHeaders(cookies: Cookies) {
 }
 
 export async function signInUser(user: User, cookies: Cookies) {
-  const accessToken = await createAccessToken(user);
-  const refreshToken = await createRefreshToken(user);
+  const accessToken = await getNewAccessToken(user);
+  const refreshToken = await getNewRefreshToken(user);
   setSessionCookies(cookies, accessToken, refreshToken);
 }
 
 export async function getCurrentUserOrRefresh(cookies: Cookies) {
   const accessToken = cookies.get("access_token");
   if (accessToken) {
-    const accessTokenPayload = await verifyAccessToken(accessToken);
+    const accessTokenPayload = await getAccessTokenPayload(accessToken);
     if (accessTokenPayload) {
       const user = await prisma.user.findUnique({ where: { id: accessTokenPayload.userId } });
       if (
@@ -231,7 +231,7 @@ export async function getCurrentUserOrRefresh(cookies: Cookies) {
   if (!refreshToken) {
     return null;
   }
-  const refreshTokenPayload = await verifyRefreshToken(refreshToken);
+  const refreshTokenPayload = await getRefreshTokenPayload(refreshToken);
   if (!refreshTokenPayload) {
     return null;
   }
@@ -251,8 +251,8 @@ export async function getCurrentUserOrRefresh(cookies: Cookies) {
     ) {
       return null;
     }
-    const newRefreshToken = await rotateRefreshToken(tokenRow.user, refreshToken);
-    const newAccessToken = await createAccessToken(tokenRow.user);
+    const newRefreshToken = await getNextRefreshToken(tokenRow.user, refreshToken);
+    const newAccessToken = await getNewAccessToken(tokenRow.user);
     setSessionCookies(cookies, newAccessToken, newRefreshToken);
     return getSanitizedUser(tokenRow.user);
   });
